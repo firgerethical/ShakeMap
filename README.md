@@ -1,4 +1,4 @@
-# 🌍 Earthquake & Report API Client (Retrofit)
+# 🌍 ShakeMap - API 
 
 Este proyecto Android está diseñado para consumir una API REST relacionada con **terremotos** y **reportes sísmicos**. Utilizamos **Retrofit** como cliente HTTP para una integración eficiente, segura y escalable.
 
