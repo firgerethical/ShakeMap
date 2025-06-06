@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.util.Log
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,16 +31,16 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val reportes = response.body()
                     val texto = reportes?.joinToString("\n\n") {
-                        "ID: ${it.report_id}\nLugar: ${it.locstring}\nMagnitud: ${it.mag}\nFecha: ${it.time}"
-                    } ?: "No hay datos"
+                        "📍 ID: ${it.report_id}\n📌 Lugar: ${it.locstring}\n🌐 Magnitud: ${it.mag}\n📅 Fecha: ${it.time}"
+                    } ?: "⚠️ No hay datos disponibles"
                     textView.text = texto
                 } else {
-                    textView.text = "Error: ${response.code()}"
+                    textView.text = "❌ Error al obtener reportes: ${response.code()}"
                 }
             }
 
             override fun onFailure(call: Call<List<ReporteSismo>>, t: Throwable) {
-                textView.text = "Fallo: ${t.message}"
+                textView.text = "🚫 Fallo de red al obtener reportes: ${t.message}"
             }
         })
     }
@@ -50,17 +51,69 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val earthquakes = response.body()
                     val texto = earthquakes?.joinToString("\n") {
-                        "ID de terremoto: ${it.earthquake_id}"
-                    } ?: "No hay terremotos"
+                        "🌍 ID de terremoto: ${it.earthquake_id}"
+                    } ?: "⚠️ No hay terremotos registrados"
                     textViewEarthquakes.text = texto
                 } else {
-                    textViewEarthquakes.text = "Error: ${response.code()}"
+                    textViewEarthquakes.text = "❌ Error al obtener terremotos: ${response.code()}"
                 }
             }
 
             override fun onFailure(call: Call<List<Earthquake>>, t: Throwable) {
-                textViewEarthquakes.text = "Fallo: ${t.message}"
+                textViewEarthquakes.text = "🚫 Fallo de red al obtener terremotos: ${t.message}"
             }
         })
     }
+    private fun obtenerDetalleTerremoto(eqId: String) {
+        RetrofitClient.api.getEarthquakeDetail(apiKey, eqId)
+            .enqueue(object : Callback<EarthquakeDetail> {
+                override fun onResponse(call: Call<EarthquakeDetail>, response: Response<EarthquakeDetail>) {
+                    if (response.isSuccessful) {
+                        Log.d("DetalleTerremoto ✅", response.body().toString())
+                    } else {
+                        Log.e("DetalleTerremoto ❌", "Error: ${response.code()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<EarthquakeDetail>, t: Throwable) {
+                    Log.e("DetalleTerremoto 🚫", "Fallo: ${t.message}")
+                }
+            })
+    }
+
+    private fun obtenerDetalleReporte(reportId: Int) {
+        RetrofitClient.api.getReporteDetalle(apiKey, reportId)
+            .enqueue(object : Callback<ReporteDetalle> {
+                override fun onResponse(call: Call<ReporteDetalle>, response: Response<ReporteDetalle>) {
+                    if (response.isSuccessful) {
+                        Log.d("DetalleReporte ✅", response.body().toString())
+                    } else {
+                        Log.e("DetalleReporte ❌", "Error: ${response.code()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<ReporteDetalle>, t: Throwable) {
+                    Log.e("DetalleReporte 🚫", "Fallo: ${t.message}")
+                }
+            })
+    }
+
+    private fun obtenerReportesPorTerremoto(eqId: String) {
+        RetrofitClient.api.getReportesPorTerremoto(apiKey, eqId)
+            .enqueue(object : Callback<List<ReporteDetalle>> {
+                override fun onResponse(call: Call<List<ReporteDetalle>>, response: Response<List<ReporteDetalle>>) {
+                    if (response.isSuccessful) {
+                        Log.d("ReportesPorTerremoto ✅", response.body().toString())
+                    } else {
+                        Log.e("ReportesPorTerremoto ❌", "Error: ${response.code()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<List<ReporteDetalle>>, t: Throwable) {
+                    Log.e("ReportesPorTerremoto 🚫", "Fallo: ${t.message}")
+                }
+            })
+    }
+
+
 }
